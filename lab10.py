@@ -11,31 +11,88 @@
 
 
 def eval_rpn(tokens):
-    # Outline (write your plan here first):
-    #   ...
-    # TODO: `tokens` is a list of strings in Reverse Polish Notation - either an integer
-    #   or one of the operators "+", "-", "*", "/". Evaluate it and return the integer
-    #   result. Division should truncate toward zero (int(a / b)).
-    #   Example: ["2","1","+","3","*"]  ->  9
-    pass
+     # Outline:
+    # 1. Create an empty list `stack` to hold integer operands.
+    # 2. Loop through each `token` in `tokens`:
+    #    - If `token` is one of "+", "-", "*", "/":
+    #      a. Pop the top two numbers from `stack` (`b` first, then `a`).
+    #      b. Apply the operator (`a + b`, `a - b`, `a * b`, or `int(a / b)`).
+    #      c. Push the result back onto `stack`.
+    #    - Otherwise, convert `token` to an `int` and push it onto `stack`.
+    # 3. Return the single remaining number in `stack`.
+
+    stack = []
+    operators = {"+", "-", "*", "/"}
+
+    for token in tokens:
+        if token in operators:
+            b = stack.pop()  # Right operand (popped first)
+            a = stack.pop()  # Left operand (popped second)
+
+            if token == "+":
+                stack.append(a + b)
+            elif token == "-":
+                stack.append(a - b)
+            elif token == "*":
+                stack.append(a * b)
+            elif token == "/":
+                stack.append(int(a / b))  # Truncates toward zero
+        else:
+            stack.append(int(token))
+
+    return stack[0]
 
 
 def decode_string(s):
-    # Outline:
-    #   ...
-    # TODO: decode a string written with the rule k[encoded], meaning `encoded` repeated
-    #   k times. The brackets can be nested.
-    #   Example: "3[a2[c]]"  ->  "accaccacc"
-    pass
+     # Outline:
+    # 1. Initialize an empty `stack`, `curr_str = ""`, and `curr_num = 0`.
+    # 2. Loop through each character `ch` in `s`:
+    #    - If `ch` is a digit, update `curr_num` (handles multi-digit numbers like 12[a]).
+    #    - Else if `ch == "["`, push `(curr_str, curr_num)` onto `stack`, then reset both.
+    #    - Else if `ch == "]"`, pop `(prev_str, k)` from `stack` and set `curr_str = prev_str + curr_str * k`.
+    #    - Otherwise (a letter), append `ch` to `curr_str`.
+    # 3. Return `curr_str`.
+
+    stack = []
+    curr_str = ""
+    curr_num = 0
+
+    for ch in s:
+        if ch.isdigit():
+            curr_num = curr_num * 10 + int(ch)
+        elif ch == "[":
+            stack.append((curr_str, curr_num))
+            curr_str = ""
+            curr_num = 0
+        elif ch == "]":
+            prev_str, k = stack.pop()
+            curr_str = prev_str + (curr_str * k)
+        else:
+            curr_str += ch
+
+    return curr_str
 
 
 def daily_temperatures(temps):
-    # Outline:
-    #   ...
-    # TODO: for each day, return how many days you'd wait for a WARMER temperature.
-    #   Put 0 if no warmer day ever comes.
-    #   Example: [73,74,75,71,69,72,76,73]  ->  [1,1,4,2,1,1,0,0]
-    pass
+     # Outline:
+    # 1. Create `result` filled with 0s of the same length as `temps`, and an empty `stack`.
+    # 2. Loop through `(i, temp)` in `enumerate(temps)`:
+    #    - While `stack` is not empty and `temp > temps[stack[-1]]`:
+    #      a. Pop `prev_day` from `stack`.
+    #      b. Set `result[prev_day] = i - prev_day`.
+    #    - Push current index `i` onto `stack`.
+    # 3. Return `result`.
+
+    result = [0] * len(temps)
+    stack = []  # Stores indices of days waiting for a warmer temperature
+
+    for i, temp in enumerate(temps):
+        while stack and temp > temps[stack[-1]]:
+            prev_day = stack.pop()
+            result[prev_day] = i - prev_day
+        stack.append(i)
+
+    return result
 
 
 def num_islands(grid):   # Part 4 - stretch (optional)
